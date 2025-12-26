@@ -5,7 +5,7 @@
 ![License](https://img.shields.io/badge/license-MIT-green.svg) ![System](https://img.shields.io/badge/system-MAINNET-red) ![Status](https://img.shields.io/badge/status-OPERATIONAL-brightgreen)
 
 ## ⚡️ Live Terminal
-**[👉 Initialize Scanner Here](https://depayet.github.io/Arkadiko-Opportunity-Scanner/)**
+**[👉 Initialize Scanner Here]**
 
 ---
 
