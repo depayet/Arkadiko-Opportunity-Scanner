@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Arkadiko Command Center</title>
+    <style>
+        :root {
+            --bg: #050505;
+            --panel: #111;
+            --border: #333;
+            --primary: #00ff88; /* Matrix Green */
+            --alert: #ff0055;
+            --text: #eee;
+            --mono: 'Courier New', Courier, monospace;
+        }
+
+        body {
+            background-color: var(--bg);
+            color: var(--text);
+            font-family: var(--mono);
+            margin: 0;
+            padding: 2rem;
+            display: flex;
+            justify-content: center;
+        }
+
+        .terminal {
+            width: 100%;
+            max-width: 800px;
+            border: 1px solid var(--border);
+            background: var(--panel);
+            padding: 20px;
+            box-shadow: 0 0 20px rgba(0, 255, 136, 0.1);
+        }
+
+        .header {
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 15px;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        h1 { margin: 0; font-size: 1.2rem; text-transform: uppercase; letter-spacing: 2px; color: var(--primary); }
+        .status { font-size: 0.8rem; color: #888; }
+        .blink { animation: blinker 1s linear infinite; }
+
+        @keyframes blinker { 50% { opacity: 0; } }
+
+        /* SCANNER SECTION */
+        .controls { margin-bottom: 20px; display: flex; gap: 10px; }
+        
+        button {
+            background: transparent;
+            border: 1px solid var(--primary);
+            color: var(--primary);
+            padding: 10px 20px;
+            font-family: var(--mono);
+            cursor: pointer;
+            text-transform: uppercase;
+            font-weight: bold;
+            transition: 0.2s;
+        }
+        button:hover { background: var(--primary); color: #000; box-shadow: 0 0 15px var(--primary); }
+
+        /* DATA LOGS */
+        .log-window {
+            height: 300px;
+            background: #000;
+            border: 1px solid var(--border);
+            padding: 15px;
+            overflow-y: auto;
+            font-size: 0.9rem;
+            margin-bottom: 20px;
+        }
+
+        .log-entry { margin-bottom: 8px; border-bottom: 1px solid #222; padding-bottom: 4px; }
+        .log-time { color: #666; margin-right: 10px; }
+        .type-liq { color: var(--alert); font-weight: bold; }
+        .type-arb { color: #00ccff; font-weight: bold; }
+        .highlight { background: rgba(255, 0, 85, 0.2); }
+
+        /* METRICS ROW */
+        .metrics { display: flex; gap: 20px; margin-top: 20px; border-top: 1px solid var(--border); padding-top: 20px; }
+        .metric-box { flex: 1; border: 1px solid #222; padding: 10px; text-align: center; }
+        .metric-label { font-size: 0.7rem; color: #888; text-transform: uppercase; }
+        .metric-val { font-size: 1.5rem; font-weight: bold; margin-top: 5px; }
+
+    </style>
+</head>
+<body>
+
+<div class="terminal">
+    <div class="header">
+        <h1>Arkadiko_Opp_Scanner <span class="blink">_</span></h1>
+        <div class="status">NET: MAINNET // NODE: ACTIVE</div>
+    </div>
+
+    <div class="controls">
+        <button onclick="startScan()">INITIATE SCAN</button>
+        <button onclick="clearLog()" style="border-color: #555; color: #555;">CLEAR LOGS</button>
+    </div>
+
+    <div class="log-window" id="consoleLogs">
+        <div class="log-entry"><span class="log-time">SYSTEM</span> Ready to scan Arkadiko Smart Contracts...</div>
+    </div>
+
+    <div class="metrics">
+        <div class="metric-box">
+            <div class="metric-label">USDA Price</div>
+            <div class="metric-val" id="usdaPrice">$1.00</div>
+        </div>
+        <div class="metric-box">
+            <div class="metric-label">Vuln. Vaults</div>
+            <div class="metric-val" id="vulnVaults" style="color: var(--alert)">0</div>
+        </div>
+        <div class="metric-box">
+            <div class="metric-label">Potential Profit</div>
+            <div class="metric-val" id="profitVal">0 STX</div>
+        </div>
+    </div>
+</div>
+
+<script>
+    const logWindow = document.getElementById('consoleLogs');
+    let isScanning = false;
+
+    function log(message, type = '') {
+        const time = new Date().toLocaleTimeString('en-US', { hour12: false });
+        const div = document.createElement('div');
+        div.className = 'log-entry';
+        
+        let typeSpan = '';
+        if (type === 'LIQ') typeSpan = '<span class="type-liq">[LIQUIDATION FOUND]</span> ';
+        if (type === 'ARB') typeSpan = '<span class="type-arb">[PEG ARBITRAGE]</span> ';
+        
+        div.innerHTML = `<span class="log-time">${time}</span> ${typeSpan}${message}`;
+        if (type === 'LIQ') div.classList.add('highlight');
+        
+        logWindow.appendChild(div);
+        logWindow.scrollTop = logWindow.scrollHeight;
+    }
+
+    function clearLog() {
+        logWindow.innerHTML = '<div class="log-entry"><span class="log-time">SYSTEM</span> Log cleared.</div>';
+    }
+
+    function startScan() {
+        if (isScanning) return;
+        isScanning = true;
+        log("Connecting to Stacks Node...", "sys");
+        
+        let count = 0;
+        let found = 0;
+        let profit = 0;
+
+        // Simulate a scanning process
+        const interval = setInterval(() => {
+            count++;
+            
+            // Random Logic to simulate finding "opportunities"
+            const rand = Math.random();
+            
+            // 1. Simulate USDA Price Fluctuation
+            const usda = (0.98 + (Math.random() * 0.04)).toFixed(3);
+            document.getElementById('usdaPrice').innerText = `$${usda}`;
+            
+            if (usda < 0.99) {
+                log(`USDA drifting ($${usda}). Buy opportunity on Alex.`, "ARB");
+            } else if (count % 3 === 0) {
+                log(`Scanning Vault ID #${Math.floor(Math.random() * 5000)}... Clean.`);
+            }
+
+            // 2. Simulate Finding a Liquidatable Vault
+            if (rand > 0.85) {
+                const vaultId = Math.floor(Math.random() * 5000);
+                const debt = Math.floor(Math.random() * 1000) + 500;
+                const profitEst = (debt * 0.10).toFixed(0); // 10% liquidation penalty fee
+                
+                log(`Vault #${vaultId} CR at 128%! Liquidate for ${profitEst} STX profit.`, "LIQ");
+                
+                found++;
+                profit += parseInt(profitEst);
+                
+                // Update Dashboard Numbers
+                document.getElementById('vulnVaults').innerText = found;
+                document.getElementById('profitVal').innerText = profit + " STX";
+            }
+
+            if (count > 8) {
+                clearInterval(interval);
+                isScanning = false;
+                log("Scan complete. Waiting for next block.");
+            }
+
+        }, 800);
+    }
+</script>
+
+</body>
+</html>
